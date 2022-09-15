@@ -2,6 +2,7 @@
 import Chart from "./components/Chart.vue";
 import Container from "./components/Container.vue";
 import Stat from "./components/Stat.vue";
+import axios from "axios";
 </script>
 
 <template>
@@ -12,16 +13,25 @@ import Stat from "./components/Stat.vue";
       <div class="stats">
         <Stat>
           <template #name>year</template>
-          <template #figure>2000</template>
+          <template #figure>{{ years[currentYearIndex] }}</template>
         </Stat>
 
         <Stat>
           <template #name>global total</template>
-          <template #figure>23200</template>
+          <template #figure>{{
+            Math.round(totalEmissions[currentYearIndex])
+          }}</template>
         </Stat>
       </div>
 
-      <Chart />
+      <div class="ChartHolder">
+        <p v-if="loading">Loading data...</p>
+        <p v-else-if="errored">
+          There was an error loading the chart data. Please check console for
+          details.
+        </p>
+        <Chart v-else :data="data['1961']" />
+      </div>
 
       <small class="attribution">
         data source:
@@ -36,6 +46,53 @@ import Stat from "./components/Stat.vue";
     </Container>
   </main>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      data: {},
+      years: [],
+      totalEmissions: [],
+      currentYearIndex: 0,
+      loading: false,
+      errored: false,
+    };
+  },
+
+  async created() {
+    await this.fetchData();
+    this.years = Object.keys(this.data);
+    this.totalEmissions = Object.values(this.data).map((year) => {
+      const emissions = year.map((country) => country.emissions);
+
+      return emissions.reduce((carry, value) => (carry += value), 0);
+    });
+  },
+
+  mounted() {
+    const yearsInterval = setInterval(() => {
+      if (this.years[this.currentYearIndex + 1] !== undefined) {
+        this.currentYearIndex++;
+      } else {
+        clearInterval(yearsInterval);
+      }
+    }, 1000);
+  },
+
+  methods: {
+    async fetchData() {
+      this.loading = true;
+      const { data } = await axios.get(
+        "http://127.0.0.1:8000/countries/all/emissions"
+      );
+      this.loading = false;
+
+      this.data = data;
+    },
+  },
+};
+</script>
 
 <style lang="scss" scoped>
 .title {
@@ -57,7 +114,15 @@ import Stat from "./components/Stat.vue";
   margin-top: 2rem;
 }
 
-.Chart {
+.ChartHolder {
   margin-top: 2rem;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid #e6e6e6;
+  padding: 2rem;
+
+  p {
+    text-align: center;
+  }
 }
 </style>
