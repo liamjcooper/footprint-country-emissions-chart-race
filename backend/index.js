@@ -1,34 +1,36 @@
 import express from "express";
 import bodyParser from "body-parser";
-import footprintApi from "./footprintApi";
 import fs from "fs";
+import cors from "cors";
+
+import footprintApi from "./footprintApi";
 
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cors());
 
 app.get("/countries/all/emissions", async (req, res) => {
-  // const countries = await footprintApi.getCountries();
+  const countries = await footprintApi.getCountries();
 
-  // let results = {};
-  // await Promise.all(
-  //   countries.map(async (country) => {
-  //     const periods = await footprintApi.getDataForCountry(country.countryCode);
+  const countriesPeriods = await Promise.all(
+    countries.map((country) =>
+      footprintApi.getDataForCountry(country.countryCode)
+    )
+  );
 
-  //     periods.forEach((period) => {
-  //       if (!results[period.year]) {
-  //         results[period.year] = [];
-  //       }
+  const results = {};
 
-  //       results[period.year].push({
-  //         name: period.countryName,
-  //         emissions: "carbon" in period ? period.carbon : null,
-  //       });
-  //     });
-  //   })
-  // );
+  countriesPeriods.flat().forEach((period) => {
+    if (!results.hasOwnProperty(period.year)) {
+      results[period.year] = [];
+    }
 
-  const results = await JSON.parse(fs.readFileSync("./lib/emissions.json"));
+    results[period.year].push({
+      name: period.countryName,
+      emissions: "carbon" in period ? period.carbon : null,
+    });
+  });
 
   res.send(results);
 });
