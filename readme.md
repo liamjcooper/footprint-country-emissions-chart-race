@@ -1,5 +1,9 @@
 # Emissions per country per year chart race
 
+
+https://user-images.githubusercontent.com/17281410/191602826-11b4bffc-b538-4829-8fef-96861f971897.mov
+
+
 ## Install backend
 Clone this repo, then
 ```bash
