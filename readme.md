@@ -1,8 +1,6 @@
 # Emissions per country per year chart race
 
-
-https://user-images.githubusercontent.com/17281410/191602826-11b4bffc-b538-4829-8fef-96861f971897.mov
-
+https://user-images.githubusercontent.com/17281410/191603926-6deabbfb-266e-456c-9d19-25a5d8c84740.mp4
 
 ## Install backend
 Clone this repo, then
