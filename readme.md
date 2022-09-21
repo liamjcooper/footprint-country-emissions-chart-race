@@ -9,8 +9,9 @@ cd backend && npm i
 ```
 
 ## Run backend
-The backend runs on port 5000, go to `http://localhost:5000/` to 
+The backend runs on port 8000
 
+*N.B. I changed the port from 5000 to 8000 as my Mac had a process already listening on port 5000 called controlcentre(?). Possibly something to do with AirPlay.*
 ```bash
 npm start
 ```
@@ -27,6 +28,8 @@ cd frontend && yarn
 ```
 
 ## Run frontend
+The frontend runs on port 5173
+
 ```bash
 yarn dev
 ```
