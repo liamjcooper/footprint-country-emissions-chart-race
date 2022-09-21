@@ -1,49 +1,93 @@
 <script setup>
 import * as d3 from "d3";
-import { onMounted } from "vue";
+import { computed, onMounted, ref, toRefs, watch } from "vue";
 
 const props = defineProps({ data: Array });
-const sorted = props.data.sort((a, b) => b.emissions - a.emissions);
+const { data } = toRefs(props);
+const sorted = computed(() =>
+  data.value.sort((a, b) => b.emissions - a.emissions)
+);
 
-onMounted(() => {
-  const width = 600;
-  const height = 5000;
-  const margin = 200;
+const width = 960;
+const height = 5000;
+const margin = 300;
 
-  // root SVG element
-  const svg = d3.select("svg").attr("width", width).attr("height", height);
+const svg = ref();
+const countryScale = ref();
+const countryAxis = ref();
+const emissionsScale = ref();
 
-  // axes
-  const emissionsAxis = d3
-    .scaleLinear()
-    .domain([0, sorted[0].emissions])
-    .range([0, width - margin]);
-  const countryAxis = d3
-    .scaleBand()
-    .domain(sorted.map((country) => country.name))
-    .range([0, height - margin]);
+const update = (data) => {
+  countryScale.value.domain(data.map((country) => country.name));
+  emissionsScale.value.domain([0, data[0].emissions]);
 
-  svg
-    .append("g")
-    .attr("transform", `translate(${margin}, ${height - margin})`)
-    .call(d3.axisBottom(emissionsAxis));
+  const bars = svg.value.selectAll(".bar").data(data);
 
-  svg
-    .append("g")
-    .attr("transform", `translate(${margin}, 0)`)
-    .call(d3.axisLeft(countryAxis));
-
-  // bar config
-  svg
-    .selectAll("rect")
-    .data(sorted)
+  bars
     .enter()
     .append("rect")
+    .attr("class", "bar")
     .attr("x", margin)
-    .attr("y", (country) => countryAxis(country.name))
-    .attr("width", (country) => emissionsAxis(country.emissions))
-    .attr("height", () => countryAxis.bandwidth())
-    .attr("fill", "#9dd7e5");
+    .attr("y", (country) => countryScale.value(country.name))
+    .attr("height", () => countryScale.value.bandwidth())
+    .attr("rx", "3px")
+    .attr("ry", "3px")
+    .merge(bars)
+    .transition()
+    .attr("y", (country) => countryScale.value(country.name))
+    .attr("width", (country) => emissionsScale.value(country.emissions));
+
+  const emissionsLabels = svg.value.selectAll(".emissionsLabel").data(data);
+
+  emissionsLabels
+    .enter()
+    .append("text")
+    .attr("class", "emissionsLabel")
+    .attr("x", width - margin)
+    .attr(
+      "y",
+      (country) =>
+        countryScale.value(country.name) +
+        countryScale.value.bandwidth() / 2 +
+        5
+    )
+    .merge(emissionsLabels)
+    .transition()
+    .attr(
+      "y",
+      (country) =>
+        countryScale.value(country.name) +
+        countryScale.value.bandwidth() / 2 +
+        5
+    )
+    .text((country) => country.emissions?.toPrecision(5) || "N/A");
+
+  svg.value.select(".yAxis").transition().call(countryAxis.value);
+};
+
+onMounted(() => {
+  svg.value = d3.select("svg").attr("width", width).attr("height", height);
+
+  countryScale.value = d3
+    .scaleBand()
+    .range([0, height - margin])
+    .padding(0.5);
+  emissionsScale.value = d3.scaleLinear().range([0, width - margin * 2 - 20]);
+
+  countryAxis.value = d3
+    .axisLeft(countryScale.value)
+    .tickSize(0)
+    .tickPadding(20);
+
+  svg.value
+    .append("g")
+    .attr("transform", `translate(${margin}, 0)`)
+    .attr("class", "yAxis")
+    .call(countryAxis.value);
+
+  update(sorted.value);
+
+  watch(sorted, update);
 });
 </script>
 
@@ -52,3 +96,19 @@ onMounted(() => {
     <svg />
   </div>
 </template>
+
+<style lang="scss">
+.yAxis path {
+  stroke: none;
+}
+
+text {
+  font-family: "Inter";
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+rect.bar {
+  fill: #9dd7e5;
+}
+</style>
