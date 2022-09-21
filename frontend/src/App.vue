@@ -13,13 +13,17 @@ import axios from "axios";
       <div class="stats">
         <Stat>
           <template #name>year</template>
-          <template #figure>{{ years[currentYearIndex] }}</template>
+          <template #figure>
+            {{ years.length ? years[currentYearIndex] : "--" }}
+          </template>
         </Stat>
 
         <Stat>
           <template #name>global total</template>
           <template #figure>{{
-            Math.round(totalEmissions[currentYearIndex])
+            totalEmissions.length
+              ? Math.round(totalEmissions[currentYearIndex])
+              : "--"
           }}</template>
         </Stat>
       </div>
@@ -30,7 +34,7 @@ import axios from "axios";
           There was an error loading the chart data. Please check console for
           details.
         </p>
-        <Chart v-else :data="data['1961']" />
+        <Chart v-else :data="data[years[currentYearIndex]]" />
       </div>
 
       <small class="attribution">
@@ -61,6 +65,7 @@ export default {
   },
 
   async created() {
+    this.loading = true;
     await this.fetchData();
     this.years = Object.keys(this.data);
     this.totalEmissions = Object.values(this.data).map((year) => {
@@ -68,27 +73,26 @@ export default {
 
       return emissions.reduce((carry, value) => (carry += value), 0);
     });
-  },
-
-  mounted() {
-    const yearsInterval = setInterval(() => {
-      if (this.years[this.currentYearIndex + 1] !== undefined) {
-        this.currentYearIndex++;
-      } else {
-        clearInterval(yearsInterval);
-      }
-    }, 1000);
+    this.loading = false;
+    this.start();
   },
 
   methods: {
     async fetchData() {
-      this.loading = true;
       const { data } = await axios.get(
         "http://127.0.0.1:8000/countries/all/emissions"
       );
-      this.loading = false;
 
       this.data = data;
+    },
+    start() {
+      const yearsInterval = setInterval(() => {
+        if (this.years[this.currentYearIndex + 1] !== undefined) {
+          this.currentYearIndex++;
+        } else {
+          clearInterval(yearsInterval);
+        }
+      }, 1000);
     },
   },
 };
