@@ -1,7 +1,7 @@
 <template>
   <div class="Stat">
-    <span class="Stat__heading"><slot name="name" /></span>
-    <span class="Stat__figure"><slot name="figure" /></span>
+    <span class="Stat__heading"><slot name="name"></slot></span>
+    <span class="Stat__figure"><slot name="figure"></slot></span>
   </div>
 </template>
 

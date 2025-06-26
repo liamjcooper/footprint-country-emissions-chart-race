@@ -1,40 +1,53 @@
 <script setup>
-import Chart from "./components/Chart.vue";
-import Container from "./components/Container.vue";
-import Stat from "./components/Stat.vue";
-import axios from "axios";
+import Chart from './components/Chart.vue'
+import Container from './components/Container.vue'
+import Stat from './components/Stat.vue'
+import axios from 'axios'
 </script>
 
 <template>
   <main>
     <Container>
-      <h1 class="title">Historic global carbon footprint</h1>
+      <h1 class="title">
+        Historic global carbon footprint
+      </h1>
 
       <div class="stats">
         <Stat>
-          <template #name>year</template>
+          <template #name>
+            year
+          </template>
           <template #figure>
             {{ years.length ? years[currentYearIndex] : "--" }}
           </template>
         </Stat>
 
         <Stat>
-          <template #name>global total</template>
-          <template #figure>{{
-            totalEmissions.length
-              ? Math.round(totalEmissions[currentYearIndex])
-              : "--"
-          }}</template>
+          <template #name>
+            global total
+          </template>
+          <template #figure>
+            {{
+              totalEmissions.length
+                ? Math.round(totalEmissions[currentYearIndex])
+                : "--"
+            }}
+          </template>
         </Stat>
       </div>
 
       <div class="ChartHolder">
-        <p v-if="loading">Loading data...</p>
+        <p v-if="loading">
+          Loading data...
+        </p>
         <p v-else-if="errored">
           There was an error loading the chart data. Please check console for
           details.
         </p>
-        <Chart v-else :data="data[years[currentYearIndex]]" />
+        <Chart
+          v-else
+          :data="data[years[currentYearIndex]]"
+        />
       </div>
 
       <small class="attribution">
@@ -53,49 +66,49 @@ import axios from "axios";
 
 <script>
 export default {
-  data() {
+  data () {
     return {
       data: {},
       years: [],
       totalEmissions: [],
       currentYearIndex: 0,
       loading: false,
-      errored: false,
-    };
+      errored: false
+    }
   },
 
-  async created() {
-    this.loading = true;
-    await this.fetchData();
-    this.years = Object.keys(this.data);
+  async created () {
+    this.loading = true
+    await this.fetchData()
+    this.years = Object.keys(this.data)
     this.totalEmissions = Object.values(this.data).map((year) => {
-      const emissions = year.map((country) => country.emissions);
+      const emissions = year.map((country) => country.emissions)
 
-      return emissions.reduce((carry, value) => (carry += value), 0);
-    });
-    this.loading = false;
-    this.start();
+      return emissions.reduce((carry, value) => (carry += value), 0)
+    })
+    this.loading = false
+    this.start()
   },
 
   methods: {
-    async fetchData() {
+    async fetchData () {
       const { data } = await axios.get(
-        "http://127.0.0.1:8000/countries/all/emissions"
-      );
+        'http://localhost:8000/emissions/countries/all'
+      )
 
-      this.data = data;
+      this.data = data
     },
-    start() {
+    start () {
       const yearsInterval = setInterval(() => {
         if (this.years[this.currentYearIndex + 1] !== undefined) {
-          this.currentYearIndex++;
+          this.currentYearIndex++
         } else {
-          clearInterval(yearsInterval);
+          clearInterval(yearsInterval)
         }
-      }, 1000);
-    },
-  },
-};
+      }, 1000)
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -1,0 +1,40 @@
+{
+  "name": "chart-race",
+  "version": "1.0.0",
+  "description": "Chart race for global emissions, by country, per year",
+  "scripts": {
+    "init": "node ./scripts/generateData.js",
+    "backend:start": "nodemon index --exec \"node backend/index.js\"",
+    "backend:test": "mocha --require @babel/polyfill --require @babel/register tests/",
+    "frontend:start": "vite",
+    "frontend:build": "vite build"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "type": "module",
+  "author": "Liam Cooper",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.30.0",
+    "body-parser": "^1.19.2",
+    "cors": "^2.8.5",
+    "d3": "^7.6.1",
+    "dotenv": "^16.6.0",
+    "express": "^4.21.2",
+    "sass": "^1.54.9",
+    "vue": "^3.2.37"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@faker-js/faker": "*",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-vue": "^10.2.0",
+    "mocha": "^11.7.1",
+    "nodemon": "^2.0.15",
+    "vite": "^7.0.0"
+  }
+}
